@@ -1,4 +1,4 @@
-package com.nmq.netty.practise;
+package com.nmq.netty.helloworld;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;

@@ -1,4 +1,4 @@
-package com.nmq.netty.practise;
+package com.nmq.netty.helloworld;
 
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
