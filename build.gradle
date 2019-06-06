@@ -13,4 +13,6 @@ repositories {
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
     compile 'io.netty:netty-all:4.1.36.Final'
+    compile  'com.google.protobuf:protobuf-java:3.8.0'
+    compile 'com.google.protobuf:protobuf-java-util:3.8.0'
 }
