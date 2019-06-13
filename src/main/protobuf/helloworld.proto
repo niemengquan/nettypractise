@@ -12,6 +12,8 @@ service Greeter {
     rpc StreamResponse(HelloRequest) returns (stream HelloResponse) {}
     // Client-streaming example
     rpc ClientStreaming(stream HelloRequest) returns (HelloResponse){}
+    // Bidirectional-streaming
+    rpc BidirectionalStreaming(stream HelloRequest) returns (stream HelloResponse) {}
 }
 
 message HelloRequest{

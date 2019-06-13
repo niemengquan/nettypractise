@@ -123,6 +123,38 @@ public final class GreeterGrpc {
      return getClientStreamingMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<com.nmq.grpc.helloworld.HelloRequest,
+      com.nmq.grpc.helloworld.HelloResponse> getBidirectionalStreamingMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "BidirectionalStreaming",
+      requestType = com.nmq.grpc.helloworld.HelloRequest.class,
+      responseType = com.nmq.grpc.helloworld.HelloResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.BIDI_STREAMING)
+  public static io.grpc.MethodDescriptor<com.nmq.grpc.helloworld.HelloRequest,
+      com.nmq.grpc.helloworld.HelloResponse> getBidirectionalStreamingMethod() {
+    io.grpc.MethodDescriptor<com.nmq.grpc.helloworld.HelloRequest, com.nmq.grpc.helloworld.HelloResponse> getBidirectionalStreamingMethod;
+    if ((getBidirectionalStreamingMethod = GreeterGrpc.getBidirectionalStreamingMethod) == null) {
+      synchronized (GreeterGrpc.class) {
+        if ((getBidirectionalStreamingMethod = GreeterGrpc.getBidirectionalStreamingMethod) == null) {
+          GreeterGrpc.getBidirectionalStreamingMethod = getBidirectionalStreamingMethod = 
+              io.grpc.MethodDescriptor.<com.nmq.grpc.helloworld.HelloRequest, com.nmq.grpc.helloworld.HelloResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.BIDI_STREAMING)
+              .setFullMethodName(generateFullMethodName(
+                  "helloworld.Greeter", "BidirectionalStreaming"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.nmq.grpc.helloworld.HelloRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.nmq.grpc.helloworld.HelloResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new GreeterMethodDescriptorSupplier("BidirectionalStreaming"))
+                  .build();
+          }
+        }
+     }
+     return getBidirectionalStreamingMethod;
+  }
+
   /**
    * Creates a new async stub that supports all call types for the service
    */
@@ -177,6 +209,16 @@ public final class GreeterGrpc {
       return asyncUnimplementedStreamingCall(getClientStreamingMethod(), responseObserver);
     }
 
+    /**
+     * <pre>
+     * Bidirectional-streaming
+     * </pre>
+     */
+    public io.grpc.stub.StreamObserver<com.nmq.grpc.helloworld.HelloRequest> bidirectionalStreaming(
+        io.grpc.stub.StreamObserver<com.nmq.grpc.helloworld.HelloResponse> responseObserver) {
+      return asyncUnimplementedStreamingCall(getBidirectionalStreamingMethod(), responseObserver);
+    }
+
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
           .addMethod(
@@ -200,6 +242,13 @@ public final class GreeterGrpc {
                 com.nmq.grpc.helloworld.HelloRequest,
                 com.nmq.grpc.helloworld.HelloResponse>(
                   this, METHODID_CLIENT_STREAMING)))
+          .addMethod(
+            getBidirectionalStreamingMethod(),
+            asyncBidiStreamingCall(
+              new MethodHandlers<
+                com.nmq.grpc.helloworld.HelloRequest,
+                com.nmq.grpc.helloworld.HelloResponse>(
+                  this, METHODID_BIDIRECTIONAL_STREAMING)))
           .build();
     }
   }
@@ -250,6 +299,17 @@ public final class GreeterGrpc {
         io.grpc.stub.StreamObserver<com.nmq.grpc.helloworld.HelloResponse> responseObserver) {
       return asyncClientStreamingCall(
           getChannel().newCall(getClientStreamingMethod(), getCallOptions()), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Bidirectional-streaming
+     * </pre>
+     */
+    public io.grpc.stub.StreamObserver<com.nmq.grpc.helloworld.HelloRequest> bidirectionalStreaming(
+        io.grpc.stub.StreamObserver<com.nmq.grpc.helloworld.HelloResponse> responseObserver) {
+      return asyncBidiStreamingCall(
+          getChannel().newCall(getBidirectionalStreamingMethod(), getCallOptions()), responseObserver);
     }
   }
 
@@ -323,6 +383,7 @@ public final class GreeterGrpc {
   private static final int METHODID_SAY_HELLO = 0;
   private static final int METHODID_STREAM_RESPONSE = 1;
   private static final int METHODID_CLIENT_STREAMING = 2;
+  private static final int METHODID_BIDIRECTIONAL_STREAMING = 3;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -361,6 +422,9 @@ public final class GreeterGrpc {
       switch (methodId) {
         case METHODID_CLIENT_STREAMING:
           return (io.grpc.stub.StreamObserver<Req>) serviceImpl.clientStreaming(
+              (io.grpc.stub.StreamObserver<com.nmq.grpc.helloworld.HelloResponse>) responseObserver);
+        case METHODID_BIDIRECTIONAL_STREAMING:
+          return (io.grpc.stub.StreamObserver<Req>) serviceImpl.bidirectionalStreaming(
               (io.grpc.stub.StreamObserver<com.nmq.grpc.helloworld.HelloResponse>) responseObserver);
         default:
           throw new AssertionError();
@@ -416,6 +480,7 @@ public final class GreeterGrpc {
               .addMethod(getSayHelloMethod())
               .addMethod(getStreamResponseMethod())
               .addMethod(getClientStreamingMethod())
+              .addMethod(getBidirectionalStreamingMethod())
               .build();
         }
       }

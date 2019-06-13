@@ -29,7 +29,7 @@ public class HelloWorldClient {
             String message = helloResponse.getMessage();
             System.out.println("Server repsponse:" + message);
         }
-        System.out.println("------------------------------------------------------");
+        System.out.println("-----------------------Server-streaming rpc-------------------------------");
         // Server-streaming rpc
         Iterator<HelloResponse> iteratorResponse = greeterBlockingStub.streamResponse(HelloRequest.newBuilder().setName("hello").build());
         while(iteratorResponse.hasNext()){
@@ -38,7 +38,7 @@ public class HelloWorldClient {
             System.out.println("Server repsponse:" + message);
         }
 
-        System.out.println("-------------------------------------------------------");
+        System.out.println("---------------------------Client-streaming rpc----------------------------");
          // Client-streaming rpc
         /**
          * 应为是异步的请求，所以这里为了检查服务器端是否已经完成（调用onCompleted method）,这里使用了CountDownLatch 来检测，
@@ -69,6 +69,36 @@ public class HelloWorldClient {
         helloRequestStreamObserver.onNext(HelloRequest.newBuilder().setName("xiaoqiang").build());
         helloRequestStreamObserver.onCompleted();
         finishLatch.await();
-        channel.shutdown();
+
+
+        System.out.println("---------------------Bidirectional-streaming rpc----------------------------------");
+        final CountDownLatch finishLatchBi = new CountDownLatch(1);
+        // Bidirectional-streaming rpc
+        StreamObserver<HelloRequest> biResponseSteam = greeterStub.bidirectionalStreaming(new StreamObserver<HelloResponse>() {
+            @Override
+            public void onNext(HelloResponse value) {
+                System.out.println("Received response: " + value.getMessage());
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                System.out.println(t.getMessage());
+            }
+
+            @Override
+            public void onCompleted() {
+                System.out.println("Server response finish");
+                finishLatchBi.countDown();
+            }
+        });
+        biResponseSteam.onNext(HelloRequest.newBuilder().setName("北京").build());
+        biResponseSteam.onNext(HelloRequest.newBuilder().setName("上海").build());
+        biResponseSteam.onNext(HelloRequest.newBuilder().setName("深圳").build());
+        biResponseSteam.onNext(HelloRequest.newBuilder().setName("郑州").build());
+        biResponseSteam.onCompleted();
+        finishLatchBi.await();
+        //close channel
+        channel.shutdown().awaitTermination(10000,TimeUnit.MILLISECONDS);
+
     }
 }
