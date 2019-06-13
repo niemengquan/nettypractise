@@ -1,5 +1,8 @@
 package com.nmq.grpc.proto;
 
+import com.nmq.grpc.helloworld.GreeterGrpc;
+import com.nmq.grpc.helloworld.HelloRequest;
+import com.nmq.grpc.helloworld.HelloResponse;
 import io.grpc.stub.StreamObserver;
 
 /**
