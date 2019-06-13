@@ -54,6 +54,7 @@ public class HelloWorldClient {
             @Override
             public void onError(Throwable t) {
                 System.out.println(t.getMessage());
+                finishLatch.countDown();
             }
 
             @Override
@@ -83,6 +84,7 @@ public class HelloWorldClient {
             @Override
             public void onError(Throwable t) {
                 System.out.println(t.getMessage());
+                finishLatchBi.countDown();
             }
 
             @Override
