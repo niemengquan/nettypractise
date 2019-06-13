@@ -91,6 +91,38 @@ public final class GreeterGrpc {
      return getStreamResponseMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<com.nmq.grpc.helloworld.HelloRequest,
+      com.nmq.grpc.helloworld.HelloResponse> getClientStreamingMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "ClientStreaming",
+      requestType = com.nmq.grpc.helloworld.HelloRequest.class,
+      responseType = com.nmq.grpc.helloworld.HelloResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.CLIENT_STREAMING)
+  public static io.grpc.MethodDescriptor<com.nmq.grpc.helloworld.HelloRequest,
+      com.nmq.grpc.helloworld.HelloResponse> getClientStreamingMethod() {
+    io.grpc.MethodDescriptor<com.nmq.grpc.helloworld.HelloRequest, com.nmq.grpc.helloworld.HelloResponse> getClientStreamingMethod;
+    if ((getClientStreamingMethod = GreeterGrpc.getClientStreamingMethod) == null) {
+      synchronized (GreeterGrpc.class) {
+        if ((getClientStreamingMethod = GreeterGrpc.getClientStreamingMethod) == null) {
+          GreeterGrpc.getClientStreamingMethod = getClientStreamingMethod = 
+              io.grpc.MethodDescriptor.<com.nmq.grpc.helloworld.HelloRequest, com.nmq.grpc.helloworld.HelloResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.CLIENT_STREAMING)
+              .setFullMethodName(generateFullMethodName(
+                  "helloworld.Greeter", "ClientStreaming"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.nmq.grpc.helloworld.HelloRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.nmq.grpc.helloworld.HelloResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new GreeterMethodDescriptorSupplier("ClientStreaming"))
+                  .build();
+          }
+        }
+     }
+     return getClientStreamingMethod;
+  }
+
   /**
    * Creates a new async stub that supports all call types for the service
    */
@@ -135,6 +167,16 @@ public final class GreeterGrpc {
       asyncUnimplementedUnaryCall(getStreamResponseMethod(), responseObserver);
     }
 
+    /**
+     * <pre>
+     * Client-streaming example
+     * </pre>
+     */
+    public io.grpc.stub.StreamObserver<com.nmq.grpc.helloworld.HelloRequest> clientStreaming(
+        io.grpc.stub.StreamObserver<com.nmq.grpc.helloworld.HelloResponse> responseObserver) {
+      return asyncUnimplementedStreamingCall(getClientStreamingMethod(), responseObserver);
+    }
+
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
           .addMethod(
@@ -151,6 +193,13 @@ public final class GreeterGrpc {
                 com.nmq.grpc.helloworld.HelloRequest,
                 com.nmq.grpc.helloworld.HelloResponse>(
                   this, METHODID_STREAM_RESPONSE)))
+          .addMethod(
+            getClientStreamingMethod(),
+            asyncClientStreamingCall(
+              new MethodHandlers<
+                com.nmq.grpc.helloworld.HelloRequest,
+                com.nmq.grpc.helloworld.HelloResponse>(
+                  this, METHODID_CLIENT_STREAMING)))
           .build();
     }
   }
@@ -190,6 +239,17 @@ public final class GreeterGrpc {
         io.grpc.stub.StreamObserver<com.nmq.grpc.helloworld.HelloResponse> responseObserver) {
       asyncServerStreamingCall(
           getChannel().newCall(getStreamResponseMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Client-streaming example
+     * </pre>
+     */
+    public io.grpc.stub.StreamObserver<com.nmq.grpc.helloworld.HelloRequest> clientStreaming(
+        io.grpc.stub.StreamObserver<com.nmq.grpc.helloworld.HelloResponse> responseObserver) {
+      return asyncClientStreamingCall(
+          getChannel().newCall(getClientStreamingMethod(), getCallOptions()), responseObserver);
     }
   }
 
@@ -262,6 +322,7 @@ public final class GreeterGrpc {
 
   private static final int METHODID_SAY_HELLO = 0;
   private static final int METHODID_STREAM_RESPONSE = 1;
+  private static final int METHODID_CLIENT_STREAMING = 2;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -298,6 +359,9 @@ public final class GreeterGrpc {
     public io.grpc.stub.StreamObserver<Req> invoke(
         io.grpc.stub.StreamObserver<Resp> responseObserver) {
       switch (methodId) {
+        case METHODID_CLIENT_STREAMING:
+          return (io.grpc.stub.StreamObserver<Req>) serviceImpl.clientStreaming(
+              (io.grpc.stub.StreamObserver<com.nmq.grpc.helloworld.HelloResponse>) responseObserver);
         default:
           throw new AssertionError();
       }
@@ -351,6 +415,7 @@ public final class GreeterGrpc {
               .setSchemaDescriptor(new GreeterFileDescriptorSupplier())
               .addMethod(getSayHelloMethod())
               .addMethod(getStreamResponseMethod())
+              .addMethod(getClientStreamingMethod())
               .build();
         }
       }

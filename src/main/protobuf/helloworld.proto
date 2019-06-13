@@ -10,6 +10,8 @@ service Greeter {
     // Seneds a greeting
     rpc SayHello (HelloRequest) returns (HelloResponse) {}
     rpc StreamResponse(HelloRequest) returns (stream HelloResponse) {}
+    // Client-streaming example
+    rpc ClientStreaming(stream HelloRequest) returns (HelloResponse){}
 }
 
 message HelloRequest{

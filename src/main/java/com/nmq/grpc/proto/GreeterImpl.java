@@ -46,4 +46,34 @@ public class GreeterImpl extends GreeterGrpc.GreeterImplBase {
         responseObserver.onNext(HelloResponse.newBuilder().setMessage(UUID.randomUUID().toString()).build());
         responseObserver.onCompleted();
     }
+
+    /**
+     * Client streaming RPCs where the client writes a sequence of messages and sends them to the server, again using a provided stream.
+     * Once the client has finished writing the messages, it waits for the server to read them and return its response. Again gRPC guarantees
+     * message ordering within an individual RPC call.
+     * @param responseObserver
+     * @return
+     */
+    @Override
+    public StreamObserver<HelloRequest> clientStreaming(StreamObserver<HelloResponse> responseObserver) {
+        return new StreamObserver<HelloRequest>() {
+            @Override
+            public void onNext(HelloRequest value) {
+                System.out.println("ClientStreaming method received: " + value.getName());
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                System.out.println(t.getMessage());
+            }
+
+            @Override
+            public void onCompleted() {
+                // called when the client has finished writing messages
+                System.out.println("Request onCompleted!");
+                responseObserver.onNext(HelloResponse.newBuilder().setMessage("Server reponse competed").build());
+                responseObserver.onCompleted();
+            }
+        };
+    }
 }
