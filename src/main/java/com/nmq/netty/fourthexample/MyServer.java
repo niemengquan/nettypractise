@@ -1,28 +1,29 @@
-package com.nmq.netty.helloworld;
+package com.nmq.netty.fourthexample;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
 
 /**
- * netty hello world application;all request will received 'Hello World' string.
- * based on http protocol
  * @author niemengquan
- * @create 2019/6/3
+ * @create 2019/6/19
  * @modifyUser
  * @modifyDate
  */
-public class MyHelloWorldServer {
+public class MyServer {
     public static void main(String[] args) throws Exception{
         EventLoopGroup bossGroup  = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
 
         try {
-            ServerBootstrap  server = new ServerBootstrap();
+            ServerBootstrap server = new ServerBootstrap();
             server.group(bossGroup,workerGroup).channel(NioServerSocketChannel.class)
-                    .childHandler(new MyTestServerInitializer());
+                    .handler(new LoggingHandler(LogLevel.INFO))
+                    .childHandler(new WebSocketChannelInitializer());
             ChannelFuture channelFuture = server.bind(8899).sync();
             channelFuture.channel().closeFuture().sync();
         } finally {
