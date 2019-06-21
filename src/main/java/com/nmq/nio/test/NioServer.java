@@ -3,16 +3,17 @@ package com.nmq.nio.test;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
-import java.nio.channels.ServerSocketChannel;
-import java.nio.channels.SocketChannel;
+import java.nio.ByteBuffer;
+import java.nio.channels.*;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
 /**
+ * server 端保存每个连接，并转发消息给其他的客户端
  * @author niemengquan
  * @create 2019/6/18
  * @modifyUser
@@ -35,7 +36,7 @@ public class NioServer {
         while (true)  {
             selector.select();
             Set<SelectionKey> selectionKeys = selector.selectedKeys();
-            selectionKeys.stream().forEach(selectionKey -> {
+            selectionKeys.forEach(selectionKey -> {
                 final SocketChannel client;
                 try {
                     if (selectionKey.isAcceptable()){
@@ -49,16 +50,61 @@ public class NioServer {
                         String key = "【" + UUID.randomUUID().toString()+ "】";
                         clientMaps.put(key,client);
                     } else if (selectionKey.isReadable()) {
-                        ServerSocketChannel socketChannel = (ServerSocketChannel) selectionKey.channel();
-                        client = socketChannel.accept();
+                        client = (SocketChannel) selectionKey.channel();
                         // 开始读取客户端的消息
+                        ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
+                        // 这里去取的时候如果连接中断了，会抛出异常
+                        int count = 0;
+                        try {
+                            count = client.read(byteBuffer);
+                        }catch (IOException err){
+                            System.out.println(client + ":" + "退出！");
+                            // 说明该链接已经丢失
+                            selectionKey.cancel();
+                            client.socket().close();
+                            client.close();
+                            return;
+                        }
+                        if (count > 0){
+                            byteBuffer.flip();
+                            // 中文字符的编码
+                            Charset charset = Charset.forName("utf-8");
+                            CharsetDecoder charsetDecoder = charset.newDecoder();
+                            String receivedMsg = String.valueOf(charsetDecoder.decode(byteBuffer).array());
+                            System.out.println(client +"：" + receivedMsg);
+                            // 获取该连接的key
+                            String senderKey = null;
+                            for(Map.Entry<String,SocketChannel> entry: clientMaps.entrySet()){
+                                if (entry.getValue() == client){
+                                    senderKey = entry.getKey();
+                                    break;
+                                }
+                            }
+                            // 向其他的客户端，发送该客户端发送的消息
+                            for (Map.Entry<String ,SocketChannel> entry: clientMaps.entrySet()){
+                                if(client == entry.getValue()){
+                                    continue;
+                                }
+                                SocketChannel channel = entry.getValue();
+                                ByteBuffer writeBuffer = ByteBuffer.allocate(1024);
+                                writeBuffer.put((senderKey + ":" + receivedMsg).getBytes());
+                                writeBuffer.flip();
+                                try {
+                                    channel.write(writeBuffer);
+                                }catch (IOException err){
+                                    System.out.println(client + ":" + "已退出！" + senderKey + "消息发送失败！");
+                                    // 说明该链接已经丢失
+                                    selectionKey.cancel();
+                                    client.socket().close();
+                                    client.close();
+                                    return;
+                                }
+                            }
+                        }
                     }
                 }catch (Exception err){
                     err.printStackTrace();
                 }
-
-
-
 
             });
             // 处理完成之后一定要执行清空操作
