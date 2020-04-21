@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Websocket 客户端</title>
+</head>
+<body>
+<script type="text/javascript">
+    var channelId = '';
+    var ownerChannelId = '';
+    //计时器
+    var interval = null;
+    var socket;
+    if(window.WebSocket){
+        socket = new WebSocket("ws://localhost:8899/ws");
+        socket.onmessage = function (event) {
+            var ta = document.getElementById("responseText");
+            var returnMsg = event.data;
+            // 建立连接消息
+            if (returnMsg.startsWith('ws:connect:staffservice')){
+                // 保存返回的channelId
+                channelId = returnMsg.substr('ws:connect:staffservice'.length);
+                console.log('chat-channelId',channelId);
+                return;
+            }
+            // 获取自己的唯一标识的消息
+            if (returnMsg.startsWith('ws:connect:ownerId')){
+                // 保存自己的连接的channelId
+                ownerChannelId = returnMsg.substr('ws:connect:ownerId'.length);
+                console.log('ownerChannelId',ownerChannelId)
+                document.getElementById("owerId").innerHTML = ownerChannelId;
+                return;
+            }
+            //心跳消息
+            if (returnMsg == 'ws:pong:msg'){
+                console.log(returnMsg)
+                return;
+            }
+            ta.value = ta.value + "\n" + event.data;
+        }
+        socket.onopen = function(event) {
+            var ta = document.getElementById('responseText');
+            ta.value = '连接开启！';
+            socket.send('ws:connect:ownerId');
+            // 开启定时轮询，保持连接
+            interval = setInterval(sendHeartMsgTask, 5000);
+        }
+        socket.onclose = function(event) {
+            var ta =document.getElementById('responseText');
+            ta.value = ta.value + "\n" + "连接关闭！";
+        }
+        socket.onerror = function () {
+            console.log("onerror 发生异常");
+        }
+    } else {
+        alert('浏览器不支持Websocket');
+    }
+
+    function sendHeartMsgTask() {
+        if(socket.readyState == WebSocket.OPEN){
+            socket.send('ws:ping:msg')
+        }else{
+            clearInterval(interval);
+            console.log("关闭定时轮询的心跳发送机制！")
+        }
+    }
+    function send(message){
+        // 回显自己发送的消息
+        var ta = document.getElementById("responseText");
+        ta.value = ta.value + "\n" + "我：" + "\n" + message;
+
+        if (!window.WebSocket){
+            return;
+        }
+        if(socket.readyState == WebSocket.OPEN){
+            if(channelId != ''){
+                socket.send(channelId + ':' + message);
+            } else {
+                socket.send(message);
+            }
+        } else {
+            alert("连接尚未开启！");
+        }
+    }
+</script>
+
+<form onsubmit="return false">
+    <h1 id="owerId">这是我的channelId</h1>
+    <textarea name="message" style="width:400px;height: 200px;"></textarea>
+    <input type="button" value="发送数据" onclick="send(this.form.message.value)">
+    <input type="button" value="连接人工客服" onclick="send('ws:connect:staffservice')">
+    <h3>服务端输出：</h3>
+    <textarea id="responseText" style="width: 400px;height: 300px;"></textarea>
+    <input type="button" onclick="javascript: document.getElementById('responseText').value = ''" value="清空内容">
+</form>
+</body>
+</html>
